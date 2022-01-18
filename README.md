@@ -1,2 +1,2 @@
 # RealWorldDjango
-PumpSlill cours project
+PumpSkill cours project

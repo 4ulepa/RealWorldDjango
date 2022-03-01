@@ -45,7 +45,7 @@ class ReviewInstanceInline(admin.TabularInline):
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'category', 'date_start', 'is_private',
+    list_display = ('id', 'title', 'category', 'date_start', 'is_private', 'participants_number',
                     'display_enroll_count', 'display_places_left')
     list_display_links = ('id', 'title')
     list_select_related = ('category',)

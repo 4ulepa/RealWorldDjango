@@ -30,6 +30,13 @@ class Category(models.Model):
 
 
 class Event(models.Model):
+
+    FILTER_LIST = {
+        'LTE_HALF': '0',
+        'GT_HALF': '1',
+        'SOLD_OUT': '2'
+    }
+
     title = models.CharField(max_length=200, default='', verbose_name='Название')
     description = models.TextField(default='', verbose_name='Описание')
     date_start = models.DateTimeField(verbose_name='Дата начала')
@@ -63,10 +70,10 @@ class Event(models.Model):
 
 
 class Enroll(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL,
+    user = models.ForeignKey(User, null=True, on_delete=models.CASCADE,
                              verbose_name='Пользователь', related_name='enrolls')
 
-    event = models.ForeignKey(Event, null=True, on_delete=models.SET_NULL,
+    event = models.ForeignKey(Event, null=True, on_delete=models.CASCADE,
                               verbose_name='Событие', related_name='enrolls')
     created = models.DateTimeField(auto_now_add=True)
 

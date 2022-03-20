@@ -22,11 +22,11 @@ class EventFilter(admin.SimpleListFilter):
                 half = event.participants_number / 2
                 left = event.participants_number-event.enrolls.count()
                 enroll_count = event.enrolls.count()
-                if filter_value == '2' and left == 0:
+                if filter_value == Event.FILTER_LIST['SOLD_OUT'] and left == 0:
                     events_id.append(event.id)
-                elif filter_value == '0' and enroll_count <= left:
+                elif filter_value == Event.FILTER_LIST['LTE_HALF'] and enroll_count <= left:
                     events_id.append(event.id)
-                elif filter_value == '1' and enroll_count > left != 0:
+                elif filter_value == Event.FILTER_LIST['GT_HALF'] and enroll_count > left != 0:
                     events_id.append(event.id)
             return queryset.filter(id__in=events_id)
         else:

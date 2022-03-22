@@ -1,6 +1,8 @@
 from django.db import models
+from django.conf import settings
 from django.core.validators import MaxValueValidator
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 
 class Feature(models.Model):
@@ -45,20 +47,46 @@ class Event(models.Model):
     is_private = models.BooleanField(default=False, verbose_name='Частное')
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL, related_name='events')
     features = models.ManyToManyField(Feature)
+    logo = models.ImageField(upload_to='events', blank=True, null=True)
+
+    @property
+    def logo_url(self):
+        return self.logo.url if self.logo else f'{settings.STATIC_URL}images/svg-icon/event.svg'
+
+    @property
+    def rate(self):
+        objects = self.reviews.all()
+        if objects:
+            rate_list = []
+            for obj in objects:
+                rate_list.append(float(obj.rate))
+            return round(sum(rate_list) / len(rate_list), 1)
+        else:
+            return None
+
+    def get_absolute_url(self):
+        return reverse('events:event_detail', args=[self.pk])
 
     def display_enroll_count(self):
         return self.enrolls.all().count()
+
     display_enroll_count.short_description = 'Количество записей'
+
+    def places_left(self):
+        enrolls = self.enrolls.all().count()
+        left = self.participants_number - enrolls
+        return left
 
     def display_places_left(self):
         enrolls = self.enrolls.all().count()
-        left = self.participants_number - enrolls
+        left = self.places_left()
         if enrolls == self.participants_number:
             return '0 (sold out)'
         elif enrolls <= (self.participants_number / 2):
             return f'{left} (<= 50%)'
         elif enrolls > (self.participants_number / 2):
             return f'{left} (> 50%)'
+
     display_places_left.short_description = 'Осталось мест'
 
     def __str__(self):

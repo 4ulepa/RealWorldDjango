@@ -19,7 +19,7 @@
                             <h2 data-test="event_title">{{ event.title }}</h2>
                             <p data-test="event_rate" class="badge bg-warning">{{ event.rate }} / 5</p>
                             <h5 data-test="event_category" class="mt-3">{{ event.category }}</h5>
-                            <p data-test="event_description" class="my-4">{{ event.descriptiion }}</p>
+                            <p data-test="event_description" class="my-4">{{ event.description }}</p>
                             <ul>
                                 {% for feature in event.features.all %}
                                 <li data-test="feature">{{ feature }}</li>

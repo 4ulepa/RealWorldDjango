@@ -62,7 +62,7 @@ class Event(models.Model):
                 rate_list.append(float(obj.rate))
             return round(sum(rate_list) / len(rate_list), 1)
         else:
-            return None
+            return 0
 
     def get_absolute_url(self):
         return reverse('events:event_detail', args=[self.pk])

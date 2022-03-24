@@ -3,7 +3,6 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST
 from .models import Event, Category, Feature, Review
 
-# TODO: Варианты для залогиненых и нет пользователей
 
 # Create your views here.
 def event_list(request):
@@ -17,9 +16,11 @@ def event_list(request):
 
 def event_detail(request, pk):
     event = get_object_or_404(Event, pk=pk)
+    percent = int((event.display_enroll_count() / event.participants_number)
+                  * 100) if event.participants_number != 0 else 0
     context = {
         'event': event,
-        'percent': int((event.display_enroll_count() / event.participants_number) * 100)
+        'percent': percent
     }
     return render(request, 'events/event_detail.html', context)
 

@@ -1,17 +1,21 @@
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST
+from django.views.generic import ListView, DetailView, CreateView, DeleteView
 from .models import Event, Category, Feature, Review
 
 
-# Create your views here.
-def event_list(request):
-    context = {
-        'events': Event.objects.all(),
-        'categories': Category.objects.all(),
-        'features': Feature.objects.all(),
-    }
-    return render(request, 'events/event_list.html', context)
+class EventListView(ListView):
+    model = Event
+    template_name = 'events/event_list.html'
+    paginate_by = 9
+    context_object_name = 'events'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['features'] = Feature.objects.all()
+        return context
 
 
 def event_detail(request, pk):
@@ -38,27 +42,32 @@ def create_review(request):
         'created': '',  # Дата создания отзыва в формате DD.MM.YYYY
         'user_name': '',  # Полное имя пользователя
     }
-    if request.user and request.user.is_authenticated:
+    if not (request.user and request.user.is_authenticated):
+        response['msg'] = 'Отзывы могут оставлять только зарегистрированные пользователи'
+        return JsonResponse(response)
+    else:
         user = request.user
         response['user_name'] = str(user)
-        if rate and text:
-            if not Review.objects.filter(event=event_id, user=user).exists():
-                try:
-                    new_review = Review()
-                    new_review.user = user
-                    new_review.event = Event.objects.get(pk=event_id)
-                    new_review.rate = rate
-                    new_review.text = text
-                    new_review.save()
 
-                    response['created'] = str(new_review.created.strftime('%d.%m.%Y'))
-                    response['ok'] = True
-                except:
-                    response['msg'] = 'Ошибка при создании отзыва'
-            else:
-                response['msg'] = 'Вы уже оставляли отзыв к этому событию'
-        else:
-            response['msg'] = 'Оценка и текст отзыва - обязательные поля'
-    else:
-        response['msg'] = 'Отзывы могут оставлять только зарегистрированные пользователи'
+    if not (rate and text):
+        response['msg'] = 'Оценка и текст отзыва - обязательные поля'
+        return JsonResponse(response)
+
+    if Review.objects.filter(event=event_id, user=user).exists():
+        response['msg'] = 'Вы уже оставляли отзыв к этому событию'
+        return JsonResponse(response)
+
+    try:
+        new_review = Review()
+        new_review.user = user
+        new_review.event = Event.objects.get(pk=event_id)
+        new_review.rate = rate
+        new_review.text = text
+        new_review.save()
+
+        response['created'] = str(new_review.created.strftime('%d.%m.%Y'))
+        response['ok'] = True
+    except:
+        response['msg'] = 'Ошибка при создании отзыва'
+
     return JsonResponse(response)
